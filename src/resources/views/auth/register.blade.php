@@ -1,59 +1,122 @@
-<x-guest-layout>
-    <x-auth-card>
-        <x-slot name="logo">
-            <a href="/">
-                <x-application-logo class="w-20 h-20 fill-current text-gray-500" />
-            </a>
-        </x-slot>
+<style>
+    .header {
+        width: 100%;
+        height: 80px;
+    }
 
-        <!-- Validation Errors -->
-        <x-auth-validation-errors class="mb-4" :errors="$errors" />
+    .header_logo {
+        padding-left: 5vw;
+    }
 
-        <form method="POST" action="{{ route('register') }}">
+    .container {
+        display: flex;
+        height: 600px;
+        flex-direction: column;
+        background-color: f2f2f2;
+        padding-top: 3vw;
+    }
+
+    .heading {
+        font-weight: bold;
+        margin: 20px auto;
+        font-size: 20px;
+    }
+
+    .form {
+        display: flex;
+        flex-direction: column;
+        margin: 15px auto;
+    }
+
+    .form>* {
+        width: 350px;
+        height: 40px;
+        padding: 5px;
+        margin: 10px;
+        border-radius: 5px;
+    }
+
+    .form>input {
+        border: solid 1px gray;
+        background-color: f2f2f2;
+    }
+
+    .login_wrap {
+        text-align: center;
+        font-weight: bold;
+    }
+
+    .login_wrap>p {
+        margin: 0;
+        color: gray;
+    }
+
+    .submit_btn {
+        background: blue;
+        color: white;
+        font-size: 14px;
+        border: none;
+    }
+
+    .link {
+        color: blue;
+    }
+
+    .login_wrap a {
+        text-decoration: none;
+    }
+
+    .footer {
+        width: 100%;
+        text-align: center;
+        font-weight: bold;
+    }
+</style>
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Atte</title>
+    <link href="https://unpkg.com/sanitize.css" rel="stylesheet" />
+</head>
+
+<body>
+    <header>
+        <div class="header">
+            <h1 class="header_logo">Atte</h1>
+        </div>
+    </header>
+    <div class="container">
+        <h1 class="heading">会員登録</h1>
+        <form action="/register" method="post" class="form">
             @csrf
-
-            <!-- Name -->
-            <div>
-                <x-label for="name" :value="__('Name')" />
-
-                <x-input id="name" class="block mt-1 w-full" type="text" name="name" :value="old('name')" required autofocus />
-            </div>
-
-            <!-- Email Address -->
-            <div class="mt-4">
-                <x-label for="email" :value="__('Email')" />
-
-                <x-input id="email" class="block mt-1 w-full" type="email" name="email" :value="old('email')" required />
-            </div>
-
-            <!-- Password -->
-            <div class="mt-4">
-                <x-label for="password" :value="__('Password')" />
-
-                <x-input id="password" class="block mt-1 w-full"
-                                type="password"
-                                name="password"
-                                required autocomplete="new-password" />
-            </div>
-
-            <!-- Confirm Password -->
-            <div class="mt-4">
-                <x-label for="password_confirmation" :value="__('Confirm Password')" />
-
-                <x-input id="password_confirmation" class="block mt-1 w-full"
-                                type="password"
-                                name="password_confirmation" required />
-            </div>
-
-            <div class="flex items-center justify-end mt-4">
-                <a class="underline text-sm text-gray-600 hover:text-gray-900" href="{{ route('login') }}">
-                    {{ __('Already registered?') }}
-                </a>
-
-                <x-button class="ml-4">
-                    {{ __('Register') }}
-                </x-button>
-            </div>
+            @error('name')
+            <p class='error message'>{{$message}}</p>
+            @enderror
+            <input type="text" name="name" placeholder="名前">
+            @error('email')
+            <p class='error message'>{{$message}}</p>
+            @enderror
+            <input type="text" name="email" placeholder="メールアドレス">
+            @error('password')
+            <p class='error message'>{{$message}}</p>
+            @enderror
+            <input type="text" name="password" placeholder="パスワード">
+            <input type="text" name="password_confirmation" placeholder="確認用パスワード">
+            <button class="submit_btn">会員登録</button>
         </form>
-    </x-auth-card>
-</x-guest-layout>
+        <div class="login_wrap">
+            <p>アカウントをお持ちの方はこちらから</p>
+            <a href="{{ route('login') }}" class="link">ログイン</a>
+        </div>
+    </div>
+    <footer>
+        <div class="footer">
+            <p>Atte,inc.</p>
+        </div>
+    </footer>
+</body>
+
+</html>

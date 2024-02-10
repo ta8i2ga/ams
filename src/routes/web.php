@@ -1,7 +1,11 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
+/*use Illuminate\Support\Facades\Route;*/
 
+use App\Http\Controllers\AuthController;
+use Faker\Guesser\Name;
+use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Auth;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -13,12 +17,19 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
+
+Route::get('/register', [AuthController::class, 'getRegister']);
+Route::post('/register', [AuthController::class, 'postRegister']);
+Route::get('/login', [AuthController::class, 'getlogin'])->name('login');
+Route::get('/index', [AuthController::class, 'index'])->name('index')->middleware('auth');
+
+
 Route::get('/', function () {
     return view('welcome');
 });
 
-Route::get('/dashboard', function () {
+/*Route::get('/dashboard', function () {
     return view('dashboard');
-})->middleware(['auth'])->name('dashboard');
+})->middleware(['auth'])->name('dashboard');*/
 
-require __DIR__.'/auth.php';
+require __DIR__ . '/auth.php';
