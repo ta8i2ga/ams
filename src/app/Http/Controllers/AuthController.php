@@ -2,21 +2,18 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
+use App\Http\Controllers\AttendanceController;
+use Carbon\Carbon;
+use App\Models\Attendance;
+
 
 class AuthController extends Controller
 {
-    public function getRegister()
-    {
-        return view('register');
-    }
-
-    public function postRegister()
-    {
-        return view('login');
-    }
     public function index()
     {
-        return view('index');
+        $user = Auth::user();
+        return view('index')->with('user', $user);
     }
 }
