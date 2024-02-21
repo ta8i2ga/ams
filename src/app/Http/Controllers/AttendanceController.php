@@ -33,7 +33,7 @@ class AttendanceController extends Controller
         $rest->validateEndBreak($endAttendanceTime);
         Attendance::create([
             'date' => $endAttendanceTime->format('Y-m-d'),
-            'end_working' => $endAttendanceTime->format('Y-m-d H:i:s'),
+            'end_working' => $endAttendanceTime->format('Y-m-d H:i:s'), // 日時形式で保存する
             'user_id' => Auth::id()
         ]);
         return redirect('/');
