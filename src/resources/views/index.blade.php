@@ -115,7 +115,7 @@
             <nav class="header_nav">
                 <ul class="nav_list">
                     <li><a href="/">ホーム</a></li>
-                    <li><a href="">日付一覧</a></li>
+                    <li><a href="{{ route('atte') }}">日付一覧</a></li>
                     <li><a href="{{ route('logout') }}">ログアウト</a></li>
                 </ul>
             </nav>

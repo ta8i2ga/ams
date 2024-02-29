@@ -43,6 +43,15 @@ class AuthController extends Controller
 
         // 休憩開始ボタンの活性/非活性を制御
         $enableBreakStartButton = !$attendancesToday->isEmpty() &&  $attendancesToday->last()->start_working;
+        if ($enableBreakStartButton && $restsToday->isNotEmpty()) {
+            // 休憩終了データが最後にあるかどうかを確認
+            $lastRest = $restsToday->last();
+            if ($lastRest->end_break) {
+                $enableBreakStartButton = true; // 活性化
+            } else {
+                $enableBreakStartButton = false; // 非活性化
+            }
+        }
 
         // 休憩終了ボタンの活性/非活性を制御
         $enableBreakEndButton = !$attendancesToday->isEmpty() && !$restsToday->isEmpty() && $attendancesToday->last()->start_working && $restsToday->last()->start_break && !$restsToday->last()->end_break;

@@ -23,7 +23,7 @@ class RestController extends Controller
         Rest::create([
             'date' => $startBreakTime->format('Y-m-d'),
             'start_break' => $startBreakTime->format('Y-m-d H:i:s'),
-            'user_id' => $user->id
+            'user_id' => $user->id,
         ]);
         return redirect('/');
     }
@@ -40,7 +40,7 @@ class RestController extends Controller
         Rest::create([
             'date' => $endBreakTime->format('Y-m-d'),
             'end_break' => $endBreakTime->format('Y-m-d H:i:s'),
-            'user_id' => $user->id
+            'user_id' => $user->id,
         ]);
         return redirect('/');
     }

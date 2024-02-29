@@ -32,8 +32,8 @@ Route::get('/attendance/start', [AttendanceController::class, 'work_start'])->mi
 Route::get('/attendance/end', [AttendanceController::class, 'work_end'])->name('work_end')->middleware('auth');
 Route::get('/break/start', [RestController::class, 'break_start'])->name('break_start')->middleware('auth');
 Route::get('/break/end', [RestController::class, 'break_end'])->name('break_end')->middleware('auth');
-/*Route::get('/break/start', [RestController::class, 'startBreak']);
-Route::get('/break/end', [RestController::class, 'endBreak']);*/
+Route::get('/attendance', [AttendanceController::class, 'atte'])->name('atte')->middleware('auth');
+
 
 /*Route::get('/', function () {
     return view('welcome');

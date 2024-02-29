@@ -51,14 +51,10 @@ class User extends Authenticatable
     {
         return $this->hasMany(Attendance::class);
     }
-    /*public function rest()
-    {
-        return $this->belongsTo(rest::class);
-    }
     public function rests()
     {
-        return $this->hasMany(rest::class);
-    }*/
+        return $this->hasMany(Rest::class);
+    }
 
     /**
      * 今日の勤務が開始されているかどうかをチェックします。

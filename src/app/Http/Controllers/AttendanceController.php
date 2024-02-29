@@ -7,6 +7,11 @@ use App\Models\Attendance;
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
 use App\Models\Rest;
+use App\Models\User;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Pagination\LengthAwarePaginator;
+use App\Helpers\helper;
+use Illuminate\Pagination\Paginator;
 
 class AttendanceController extends Controller
 {
@@ -37,5 +42,19 @@ class AttendanceController extends Controller
             'user_id' => Auth::id()
         ]);
         return redirect('/');
+    }
+
+    public function atte(Request $request)
+    {
+        // 指定された日付を取得（指定されていない場合は今日の日付）
+        $date = $request->input('date', Carbon::today()->toDateString());
+
+        // ヘルパー関数を使って勤務と休憩情報を取得
+        $workAndBreakInfo = getWorkAndBreakInfo($date);
+
+        // ページネーションを適用して5件ずつ表示
+        $workAndBreakInfoPaginated = collect($workAndBreakInfo)->paginate(5);
+
+        return view('attendance', compact('workAndBreakInfoPaginated'));
     }
 }

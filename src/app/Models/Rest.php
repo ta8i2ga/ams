@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Support\Facades\Auth;
+use Carbon\Carbon;
 
 class Rest extends Model
 {
@@ -19,6 +20,7 @@ class Rest extends Model
 
     protected $fillable = [
         'user_id',
+        'attendance_id', // attendance_idを追加
         'date',
         'start_break',
         'end_break',
@@ -26,7 +28,7 @@ class Rest extends Model
 
     public function attendance()
     {
-        return $this->belongsTo(Attendance::class);
+        return $this->belongsTo(Attendance::class, 'attendance_id');
     }
 
     public function validateEndBreak($now): void
@@ -48,5 +50,25 @@ class Rest extends Model
         if ($result) {
             throw ValidationException::withMessages(['start_working' => ['未だ休憩を開始していません。'],]);
         }
+    }
+
+    public function calculateTotalBreakTime()
+    {
+        $totalBreakTime = 0;
+
+        // 各休憩記録に対してループ
+        foreach ($this->rests as $rest) {
+            // 開始時刻と終了時刻の取得
+            $startTime = Carbon::parse($rest->start_break);
+            $endTime = Carbon::parse($rest->end_break);
+
+            // 時間差の計算（分単位）
+            $breakDuration = $endTime->diffInMinutes($startTime);
+
+            // 合計に加算
+            $totalBreakTime += $breakDuration;
+        }
+
+        return $totalBreakTime; // 分単位での合計休憩時間を返す
     }
 }
