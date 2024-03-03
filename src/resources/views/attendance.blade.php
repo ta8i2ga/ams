@@ -64,33 +64,18 @@
                     <th>勤務時間</th>
                 </tr>
             </table>
-            @php
-            $date = request()->input('date', now()->toDateString());
-            $workAndBreakInfo = getWorkAndBreakInfo($date); // デフォルトは今日の日付を使用
-            $workAndBreakInfo = new Illuminate\Pagination\LengthAwarePaginator($workAndBreakInfo, count($workAndBreakInfo), 5);
-            @endphp
 
-            @if (!empty($workAndBreakInfo))
-            <table>
-                <tr>
-                    <th>ユーザー名</th>
-                    <th>勤務開始時間</th>
-                    <th>勤務終了時間</th>
-                    <th>合計勤務時間</th>
-                    <th>合計休憩時間</th>
-                </tr>
-            </table>
-            @endif
-
-            @foreach ($workAndBreakInfo as $info)
-            <p>ユーザー名: {{ $info['name'] }}</p>
-            <p>勤務開始時間: {{ $info['start_working'] }}</p>
-            <p>勤務終了時間: {{ $info['end_working'] }}</p>
-            <p>勤務合計時間: {{ $info['total_work_time'] }}</p>
-            <p>休憩合計時間: {{ $info['total_break_time'] }}</p>
+            @foreach ($workAndBreakInfoPaginated as $info)
+            <tr>
+                <td>{{ $info['name'] }}</td>
+                <td>{{ $info['start_working'] }}</td>
+                <td>{{ $info['end_working'] }}</td>
+                <td>{{ $info['total_work_time'] }}</td>
+                <td>{{ $info['total_break_time'] }}<br></br></td>
+            </tr>
             @endforeach
 
-            {{ $workAndBreakInfo->links() }}
+            {{ $workAndBreakInfoPaginated->links() }}
         </div>
     </main>
 </body>
