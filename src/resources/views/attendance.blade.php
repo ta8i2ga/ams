@@ -63,19 +63,18 @@
                     <th>休憩時間</th>
                     <th>勤務時間</th>
                 </tr>
+                @foreach ($users as $user)
+                <tr>
+                    <td>{{ $user->name }}</td>
+                    <td>{{ substr($user->attendances->first()->start_working,-8) }}</td>
+                    <td>{{ substr($user->attendances->last()->end_working,-8) }}</td>
+                    <td>{{ $user->totalBreakTime }}</td>
+                    <td>{{ $user->work_time_hour . ':' . $user->work_time_min . ':' . $user->work_time_s}}</td>
+                </tr>
+                @endforeach
+
+                {{ $users->links() }}
             </table>
-
-            @foreach ($workAndBreakInfoPaginated as $info)
-            <tr>
-                <td>{{ $info['name'] }}</td>
-                <td>{{ $info['start_working'] }}</td>
-                <td>{{ $info['end_working'] }}</td>
-                <td>{{ $info['total_work_time'] }}</td>
-                <td>{{ $info['total_break_time'] }}<br></br></td>
-            </tr>
-            @endforeach
-
-            {{ $workAndBreakInfoPaginated->links() }}
         </div>
     </main>
 </body>

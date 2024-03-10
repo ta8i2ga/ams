@@ -20,7 +20,6 @@ class Rest extends Model
 
     protected $fillable = [
         'user_id',
-        'attendance_id', // attendance_idを追加
         'date',
         'start_break',
         'end_break',

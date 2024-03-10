@@ -13,6 +13,8 @@ use Illuminate\Pagination\LengthAwarePaginator;
 use App\Helpers\helper;
 use Illuminate\Pagination\Paginator;
 
+use Illuminate\Database\Eloquent\Model;
+
 class AttendanceController extends Controller
 {
     public function work_start()
@@ -49,78 +51,117 @@ class AttendanceController extends Controller
         // 指定された日付を取得（指定されていない場合は今日の日付）
         $date = $request->input('date', Carbon::today()->toDateString());
 
-        // ユーザーごとの情報を取得
-        $workAndBreakInfo = $this->getWorkAndBreakInfo($date);
+        $users = User::where(function ($query) use ($date) {
+            $query->whereHas('attendances', function ($query) use ($date) {
+                $query->whereDate('start_working', $date);
+            })->orWhereHas('attendances', function ($query) use ($date) {
+                $query->whereDate('end_working', $date);
+            });
+        })->orWhere(function ($query) use ($date) {
+            $query->whereHas('rests', function ($query) use ($date) {
+                $query->whereDate('start_break', $date);
+            })->orWhereHas('rests', function ($query) use ($date) {
+                $query->whereDate('end_break', $date);
+            });
+        })->with([
+            'attendances' => function ($query) use ($date) {
+                $query->whereDate('start_working', $date)->orWhereDate('end_working', $date);
+            },
+            'rests' => function ($query) use ($date) {
+                $query->whereDate('start_break', $date)->orWhereDate('end_break', $date);
+            }
+        ])->paginate(5);
 
-        // ページネーションを適用して5件ずつ表示
-        $workAndBreakInfoPaginated = collect($workAndBreakInfo)->paginate(5);
-
-        return view('attendance', compact('workAndBreakInfoPaginated'));
-    }
-
-    public function getWorkAndBreakInfo($date)
-    {
-        // ユーザーごとの情報を格納する配列を初期化
-        $workAndBreakInfo = [];
-
-        $users = User::all(); // すべてのユーザー情報を取得
-
-        // ユーザーごとに処理
         foreach ($users as $user) {
 
-            $userAttendances = Attendance::where('user_id', $user->id)
-                ->whereDate('date', $date)
-                ->whereNotNull('start_working')
-                ->whereNotNull('end_working')
-                ->get('start_working', 'end_working');
+            // 合計勤務時間を初期化
+            $totalWorkTime = 0;
 
+            foreach ($user->attendances as $attendance) {
+                // 各出勤情報の勤務時間を計算して合計に加算する
 
-            //dd();
-
-            $userRests = Rest::where('user_id', $user->id)
-                ->whereDate('date', $date)
-                ->whereNotNull('start_break')
-                ->whereNotNull('end_break')
-                ->get(['start_break', 'end_break']);
-
-            // フォーマットした休憩開始時刻と終了時刻を格納する配列
-            $formattedRests = [];
-            foreach ($userRests as $rest) {
-                $formattedRests[] = [
-                    'start_break' => Carbon::parse($rest->start_break)->format('H:i:s'),
-                    'end_break' => Carbon::parse($rest->end_break)->format('H:i:s')
-                ];
+                $totalWorkTime += strtotime($attendance->end_working) - strtotime($attendance->start_working);
+                $user->work_time_hour = floor($totalWorkTime / 3600);     //勤務時間(秒)を3600で割ると、時間を求め、小数点を切り捨てる
+                $user->work_time_min  = floor(($totalWorkTime - ($user->work_time_hour * 3600)) / 60);    //勤務時間(秒)から時間を引いた余りを60で割ると、分を求め、小数点を切り捨てる
+                $user->work_time_s = $totalWorkTime - ($user->work_time_hour * 3600 + $user->work_time_min * 60);
             }
-
-            // フォーマットした休憩開始時刻と終了時刻を格納する配列
-            $formattedRests = [];
-            $totalBreakTime = 0;
-            for ($i = 1; $i < count($userRests); $i += 2) {
-                $startBreak = $userRests[$i - 1]->start_break;
-                $endBreak = $userRests[$i]->end_break;
-
-                // 休憩開始時刻と終了時刻の差を計算し、合計休憩時間に加算
-                if ($startBreak && $endBreak) {
-                    $start = Carbon::parse($startBreak);
-                    $end = Carbon::parse($endBreak);
-                    $breakDuration = $start->diffInSeconds($end);
-                    $totalBreakTime += $breakDuration;
-                }
-            }
-
-            // 休憩時間の合計を時:分:秒の形式にフォーマット
-            $totalBreakTimeFormatted = gmdate('H:i:s', $totalBreakTime);
-
-            // ユーザーごとの情報を配列に追加
-            $workAndBreakInfo[] = [
-                'name' => $user->name,
-                'start_working' => $formattedStartWorking ?? '---',
-                'end_working' => $formattedEndWorking ?? '---',
-                'total_work_time' => $totalWorkTime ?? '---',
-                'total_break_time' => $totalBreakTimeFormatted,
-            ];
         }
 
-        return $workAndBreakInfo;
+        foreach ($users as $user) {
+            $totalBreakTime = 0;
+
+            foreach ($user->rests as $rest) {
+                $user->totalBreakTime = 0;
+                for ($i = 1; $i < count($user->rests); $i += 2) {
+                    $startBreak = $user->rests[$i - 1]->start_break;
+                    $endBreak = $user->rests[$i]->end_break;
+                    //dd($user->rests[1]->end_break);
+                    // 休憩開始時刻と終了時刻の差を計算し、合計休憩時間に加算
+                    if ($startBreak && $endBreak) {
+                        $breakDuration = strtotime($endBreak) - strtotime($startBreak);
+                        $user->totalBreakTime += $breakDuration;
+                    }
+                }
+            }
+        }
+
+
+        //dd(strtotime($attendance->start_working));
+        //$workTotalTime = strtotime();
+
+        /*
+        // 各ユーザーごとにAttendanceテーブルからレコードを取得（start_workingがあるもの）
+        $attendancesWithStartWorking = [];
+        foreach ($users as $user) {
+            $attendance = Attendance::where('user_id', $user->id)
+                ->whereDate('date', $date)
+                ->whereNotNull('start_working')
+                ->pluck('start_working') // 'start_working' カラムの値のみを取得
+                ->toArray(); // コレクションを連想配列に変換
+            $attendancesWithStartWorking[$user->id] = $attendance;
+        }
+
+        // 各ユーザーごとにAttendanceテーブルからレコードを取得（end_workingがあるもの）
+        $attendancesWithEndWorking = [];
+        foreach ($users as $user) {
+            $attendance = Attendance::where('user_id', $user->id)
+                ->whereDate('date', $date)
+                ->whereNotNull('end_working')
+                ->get(['end_working']);
+            $attendancesWithEndWorking[$user->id] = $attendance;
+        }
+
+        // 各ユーザーごとにRestテーブルからレコードを取得（start_breakがあるもの）
+        $restsWithStartBreak = [];
+        foreach ($users as $user) {
+            $rest = Rest::where('user_id', $user->id)
+                ->whereDate('date', $date)
+                ->whereNotNull('start_break')
+                ->whereNull('end_break')
+                ->get(['start_break', 'end_break']);
+            $restsWithStartBreak[$user->id] = $rest;
+        }
+
+        // 各ユーザーごとにRestテーブルからレコードを取得（end_breakがあるもの）
+        $restsWithEndBreak = [];
+        foreach ($users as $user) {
+            $rest = Rest::where('user_id', $user->id)
+                ->whereDate('date', $date)
+                ->whereNotNull('end_break')
+                ->whereNull('start_break')
+                ->get(['start_break', 'end_break']);
+            $restsWithEndBreak[$user->id] = $rest;
+        }
+
+        // 必要に応じてビューにデータを渡す
+        return view('attendance', [
+            'date' => $date,
+            'users' => $users,
+            'attendancesWithStartWorking' => $attendancesWithStartWorking,
+            'attendancesWithEndWorking' => $attendancesWithEndWorking,
+            'restsWithStartBreak' => $restsWithStartBreak,
+            'restsWithEndBreak' => $restsWithEndBreak
+        ]);*/
+        return view('attendance', compact('users', 'date'));
     }
 }

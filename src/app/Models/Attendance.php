@@ -7,7 +7,6 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
-use App\Models\Rest;
 
 class Attendance extends Model
 {
@@ -29,11 +28,6 @@ class Attendance extends Model
     public function user()
     {
         return $this->belongsTo(User::class);
-    }
-
-    public function rests()
-    {
-        return $this->hasMany(Rest::class);
     }
 
     public static $rules = array(
