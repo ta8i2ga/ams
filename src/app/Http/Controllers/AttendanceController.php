@@ -89,22 +89,23 @@ class AttendanceController extends Controller
 
         foreach ($users as $user) {
             $totalBreakTime = 0;
+            foreach ($user->rests as $key =>$rest) {
 
-            foreach ($user->rests as $rest) {
-                $user->totalBreakTime = 0;
-                for ($i = 1; $i < count($user->rests); $i += 2) {
-                    $startBreak = $user->rests[$i - 1]->start_break;
-                    $endBreak = $user->rests[$i]->end_break;
-                    //dd($user->rests[1]->end_break);
+                if ($key % 2 === 0) {
+                    $startBreak = $rest->start_break;
+                    $endBreak = $user->rests[$key + 1]->end_break;
+
                     // 休憩開始時刻と終了時刻の差を計算し、合計休憩時間に加算
                     if ($startBreak && $endBreak) {
                         $breakDuration = strtotime($endBreak) - strtotime($startBreak);
-                        $user->totalBreakTime += $breakDuration;
+                        $totalBreakTime += $breakDuration;
                     }
                 }
             }
+            $user->break_time_hour = floor($totalBreakTime / 3600);
+            $user->break_time_min = floor(($totalBreakTime - ($user->break_time_hour * 3600)) / 60);
+            $user->break_time_s = $totalBreakTime - ($user->break_time_hour * 3600 + $user->break_time_min * 60);
         }
-
 
         //dd(strtotime($attendance->start_working));
         //$workTotalTime = strtotime();

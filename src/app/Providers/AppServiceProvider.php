@@ -26,9 +26,6 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-        {
-            Paginator::useBootstrap();
-        }
         /**
          * Paginate a standard Laravel Collection.
          *
