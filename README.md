@@ -22,4 +22,19 @@
 ## ER図
 ![サンプル画像](https://github.com/ta8i2ga/ams/blob/main/img/%E3%82%B9%E3%82%AF%E3%83%AA%E3%83%BC%E3%83%B3%E3%82%B7%E3%83%A7%E3%83%83%E3%83%88%202024-03-18%20215315.png)
 # 環境構築
-docker-compose up -d --build
+* docker-compose up -d --build
+* docker-compose exec php bash
+
+* composer install
+* composer require laravel/breeze --dev
+* php artisan migrate
+
+* php artisan breeze:install blade
+* php artisan make:controller AttendanceController
+* php artisan make:controller RestController
+* php artisan key:generate
+* php artisan make:migration create_attendances_table
+* php artisan make:migration create_rests_table
+* php artisan migrate
+* php artisan make:model Attendance
+* php artisan make:model Rest
